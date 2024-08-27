@@ -115,10 +115,6 @@ except:
     import inkex
     import simplepath
     import simpletransform
-    import simplestyle
-    import cubicsuperpath
-    import cspsubdiv
-    import bezmisc
 
 N_PAGE_WIDTH = 3200
 N_PAGE_HEIGHT = 800
