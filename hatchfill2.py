@@ -357,8 +357,8 @@ def interstices(self, p1, p2, paths, hatches, b_hold_back_hatches, f_hold_back_s
                             intersection[0] = p1[0] + s * (
                                 p2[0] - p1[0]
                             )  # compute intersection point of hatch with segment
-                            intersection[1] = p1[1] + s * (
-                                p2[1] - p1[1]
+                            intersection[1] = (
+                                p1[1] + s * (p2[1] - p1[1])
                             )  # intersecting hatch line starts at p1, vectored toward p2,
                             # but terminates at intersection
                             # Note that atan2 returns answer in range -pi to pi
@@ -645,7 +645,6 @@ def distanceSquared(p1, p2):
 
 class HatchFill2(inkex.Effect):
     def __init__(self):
-
         inkex.Effect.__init__(self)
 
         self.xmin, self.ymin = (0.0, 0.0)
@@ -736,7 +735,6 @@ class HatchFill2(inkex.Effect):
         )
 
     def getDocProps(self):
-
         """
         Get the document's height and width attributes from the <svg> tag.
         Use a default value in case the property is not present or is
@@ -752,7 +750,6 @@ class HatchFill2(inkex.Effect):
             return True
 
     def handleViewBox(self):
-
         """
         Set up the document-wide transform in the event that the document has an SVG viewbox
         """
@@ -770,7 +767,6 @@ class HatchFill2(inkex.Effect):
                     ).matrix
 
     def addPathVertices(self, path, node=None, transform=None):
-
         """
         Decompose the path data from an SVG element into individual
         subpaths, each starting with an absolute move-to (x, y)
@@ -834,7 +830,6 @@ class HatchFill2(inkex.Effect):
         self.transforms[node] = transform
 
     def getBoundingBox(self):
-
         """
         Determine the bounding box for our collection of polygons
         """
@@ -881,7 +876,6 @@ class HatchFill2(inkex.Effect):
         if mat_current is None:
             mat_current = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
         for node in a_node_list:
-
             """
              Initialize dictionary for each new node
              This allows us to create hatch fills as if each 
@@ -901,13 +895,15 @@ class HatchFill2(inkex.Effect):
                 pass
 
             # first apply the current matrix transform to this node's transform
-            mat_new = simpletransform.Transform(mat_current) @ simpletransform.Transform(node.get("transform")).matrix
+            mat_new = (
+                simpletransform.Transform(mat_current)
+                @ simpletransform.Transform(node.get("transform")).matrix
+            )
 
             if node.tag in [inkex.addNS("g", "svg"), "g"]:
                 self.recursivelyTraverseSvg(node, mat_new, parent_visibility=v)
 
             elif node.tag in [inkex.addNS("use", "svg"), "use"]:
-
                 # A <use> element refers to another SVG element via an xlink:href="#blah"
                 # attribute.  We will handle the element by doing an XPath search through
                 # the document, looking for the element with the matching id="blah"
@@ -943,7 +939,6 @@ class HatchFill2(inkex.Effect):
                     self.recursivelyTraverseSvg(refnode, mat_new2, parent_visibility=v)
 
             elif node.tag == inkex.addNS("path", "svg"):
-
                 path_data = node.get("d")
                 if path_data:
                     self.addPathVertices(path_data, node, mat_new)
@@ -974,7 +969,6 @@ class HatchFill2(inkex.Effect):
                             )
 
             elif node.tag in [inkex.addNS("rect", "svg"), "rect"]:
-
                 # Manually transform
                 #
                 #    <rect x="X" y="Y" width="W" height="H"/>
@@ -1028,7 +1022,6 @@ class HatchFill2(inkex.Effect):
                         )
 
             elif node.tag in [inkex.addNS("line", "svg"), "line"]:
-
                 # Convert
                 #
                 #   <line x1="X1" y1="Y1" x2="X2" y2="Y2/>
@@ -1074,7 +1067,6 @@ class HatchFill2(inkex.Effect):
                         )
 
             elif node.tag in [inkex.addNS("polyline", "svg"), "polyline"]:
-
                 # Convert
                 #
                 #  <polyline points="x1,y1 x2,y2 x3,y3 [...]"/>
@@ -1184,7 +1176,6 @@ class HatchFill2(inkex.Effect):
                 inkex.addNS("circle", "svg"),
                 "circle",
             ]:
-
                 # Convert circles and ellipses to a path with two 180 degree arcs.
                 # In general (an ellipse), we convert
                 #
@@ -1275,7 +1266,6 @@ class HatchFill2(inkex.Effect):
                 pass
 
     def joinFillsWithNode(self, node, stroke_width, path):
-
         """
         Generate a SVG <path> element containing the path data "path".
         Then put this new <path> element into a <group> with the supplied
@@ -1328,7 +1318,6 @@ class HatchFill2(inkex.Effect):
     def makeHatchGrid(
         self, angle, spacing, init=True
     ):  # returns True if succeeds in making grid, else False
-
         """
         Build a grid of hatch lines which encompasses the entire bounding
         box of the graphical elements we are to hatch.
@@ -1411,7 +1400,6 @@ class HatchFill2(inkex.Effect):
         return ret_value
 
     def effect(self):
-
         global ref_count
         global pt_last_position_abs
         # Viewbox handling
@@ -1571,8 +1559,8 @@ class HatchFill2(inkex.Effect):
                     direction = not direction
 
                 # Now have a nice juicy buffer full of line segments with absolute coordinates
-                f_proposed_neighborhood_radius_squared = self.ProposeNeighborhoodRadiusSquared(
-                    transformed_hatch_spacing
+                f_proposed_neighborhood_radius_squared = (
+                    self.ProposeNeighborhoodRadiusSquared(transformed_hatch_spacing)
                 )
                 # Just fixed and simple for now - may make function of neighborhood later
 
@@ -1636,28 +1624,29 @@ class HatchFill2(inkex.Effect):
                                                 - pt_reference[1]
                                             )  # proposed initial pt1 Y minus existing final pt1 Y
                                             if (
-                                                (delta_x * delta_x + delta_y * delta_y)
-                                                < f_proposed_neighborhood_radius_squared
-                                            ):
+                                                delta_x * delta_x + delta_y * delta_y
+                                            ) < f_proposed_neighborhood_radius_squared:
                                                 f_this_distance_squared = (
                                                     delta_x * delta_x
                                                     + delta_y * delta_y
                                                 )
-                                                pt_new_segment_this_end = abs_line_segments[
-                                                    innerCount
-                                                ][
-                                                    nNewSegmentInitialEndIndex
-                                                ]
-                                                pt_new_segment_other_end = abs_line_segments[
-                                                    innerCount
-                                                ][
-                                                    not nNewSegmentInitialEndIndex
-                                                ]
-                                                f_new_segment_direction_radians = math.atan2(
-                                                    pt_new_segment_this_end[1]
-                                                    - pt_new_segment_other_end[1],
-                                                    pt_new_segment_this_end[0]
-                                                    - pt_new_segment_other_end[0],
+                                                pt_new_segment_this_end = (
+                                                    abs_line_segments[innerCount][
+                                                        nNewSegmentInitialEndIndex
+                                                    ]
+                                                )
+                                                pt_new_segment_other_end = (
+                                                    abs_line_segments[innerCount][
+                                                        not nNewSegmentInitialEndIndex
+                                                    ]
+                                                )
+                                                f_new_segment_direction_radians = (
+                                                    math.atan2(
+                                                        pt_new_segment_this_end[1]
+                                                        - pt_new_segment_other_end[1],
+                                                        pt_new_segment_this_end[0]
+                                                        - pt_new_segment_other_end[0],
+                                                    )
                                                 )  # from other end to this end
                                                 # If this end would cause an alternating direction,
                                                 # then exclude it
@@ -1681,11 +1670,13 @@ class HatchFill2(inkex.Effect):
                                                     # bezier curve join.
                                                     # The criterion for being colinear is that the reference segment angle is effectively
                                                     # the same as the line connecting the reference segment to the end of the new segment.
-                                                    f_joiner_direction_radians = math.atan2(
-                                                        pt_new_segment_this_end[1]
-                                                        - pt_reference[1],
-                                                        pt_new_segment_this_end[0]
-                                                        - pt_reference[0],
+                                                    f_joiner_direction_radians = (
+                                                        math.atan2(
+                                                            pt_new_segment_this_end[1]
+                                                            - pt_reference[1],
+                                                            pt_new_segment_this_end[0]
+                                                            - pt_reference[0],
+                                                        )
                                                     )
                                                     if not self.AreCoLinear(
                                                         f_reference_direction_radians,
@@ -1730,9 +1721,9 @@ class HatchFill2(inkex.Effect):
                             pt_last_position_abs[1] = (
                                 abs_line_segments[ref_count][0][1] + delta_y
                             )
-                            abs_line_segments[ref_count][
-                                2
-                            ] = True  # True flags that this line segment has been
+                            abs_line_segments[ref_count][2] = (
+                                True  # True flags that this line segment has been
+                            )
                             # added to the path to be drawn, so should
                             # no longer be a candidate for any kind of move.
                             n_pen_lifts += 1
@@ -1797,9 +1788,9 @@ class HatchFill2(inkex.Effect):
                             pt_last_position_abs[0] += delta_x
                             pt_last_position_abs[1] += delta_y
 
-                            abs_line_segments[ref_count][
-                                2
-                            ] = True  # True flags that this line segment has been
+                            abs_line_segments[ref_count][2] = (
+                                True  # True flags that this line segment has been
+                            )
                             # added to the path to be drawn, so should
                             # no longer be a candidate for any kind of move.
                             n_pen_lifts += 1
@@ -1836,7 +1827,6 @@ class HatchFill2(inkex.Effect):
         cumulative_path,
         relative_held_line_pos,
     ):
-
         global pt_last_position_abs
         f_proposed_neighborhood_radius_squared = self.ProposeNeighborhoodRadiusSquared(
             transformed_hatch_spacing
@@ -2083,9 +2073,9 @@ class HatchFill2(inkex.Effect):
                 + pt_delta_to_add_to_outgoing_start[1]
             )
             relative_held_line_pos[0] = delta_x  # delta is from initial point
-            relative_held_line_pos[
-                1
-            ] = delta_y  # Will be printed after we know if it must be modified
+            relative_held_line_pos[1] = (
+                delta_y  # Will be printed after we know if it must be modified
+            )
 
             # Mark this segment as drawn
             abs_line_segments[count][2] = True
@@ -2113,7 +2103,6 @@ class HatchFill2(inkex.Effect):
 
     @staticmethod
     def RelativeControlPointPosition(distance, f_delta_x, f_delta_y, delta_x, delta_y):
-
         # returns the point, relative to 0, 0 offset by delta_x, delta_y,
         # which extends a distance of "distance" at a slope defined by f_delta_x and f_delta_y
         pt_return = [0, 0]
@@ -2204,7 +2193,6 @@ def parseLengthWithUnits(string_to_parse):
 
 
 def getLength(altself, name, default):
-
     PX_PER_INCH = 96.0
     """
     Get the <svg> attribute with name "name" and default value "default"
