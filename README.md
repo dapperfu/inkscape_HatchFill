@@ -2,6 +2,10 @@
 
 Inkscape HatchFill2, Forked from [EggBot's HatchFill](https://github.com/evil-mad/EggBot/) & made a "stand-alone" extension for use with Inkscape v1.0+.
 
+Fore Justification:
+
+- Didn't work with Python3 (Inkscape 1.0).
+
 Spacing is either in mm or px depending on the units of the object in Inkscape.
 
 # Example
