@@ -905,11 +905,7 @@ class HatchFill2(inkex.Effect):
                 pass
 
             # first apply the current matrix transform to this node's transform
-            mat_new = simpletransform.Transform(
-                mat_current
-            ) * simpletransform.Transform(
-                simpletransform.Transform(node.get("transform")).matrix
-            )
+            mat_new = simpletransform.Transform(mat_current) @ simpletransform.Transform(node.get("transform")).matrix
 
             if node.tag in [inkex.addNS("g", "svg"), "g"]:
                 self.recursivelyTraverseSvg(node, mat_new, parent_visibility=v)
